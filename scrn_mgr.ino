@@ -61,7 +61,7 @@ void loop() {
     }
 
     unsigned long current_millis = millis();
-    if (near_counter > 4 && (current_millis > last_up + SECOND)){ // stay for one second to turn on
+    if (near_counter > 0 && (current_millis > last_up + SECOND)){ // stay for one second to turn on
         near_applied = current_millis;
         change(true);
     } else {
