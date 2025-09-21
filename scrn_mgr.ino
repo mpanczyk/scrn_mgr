@@ -46,8 +46,8 @@ unsigned int get_distance(){
 void change(bool new_state){
     if(new_state != state_on){
         state_on = new_state;
-        digitalWrite(LED_PIN, state_on?HIGH:LOW);
-        Serial.println(state_on? "CLOSE" : "FAR");
+        digitalWrite(LED_PIN, state_on ? HIGH : LOW);
+        Serial.println(state_on ? "CLOSE" : "FAR");
     }
 }
 
