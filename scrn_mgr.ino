@@ -17,12 +17,12 @@
 #define SECOND 1000 // 1000 milliseconds
 
 Adafruit_VL53L0X lox = Adafruit_VL53L0X();
-unsigned int distance_threshold = 300; // mm
 unsigned long proximity_reported = 0;
-unsigned long proximity_started;
+unsigned long proximity_started = 0;
 unsigned int INF_DISTANCE = INT_MAX;
 bool state_on = false;
 
+unsigned int distance_threshold = 300; // mm
 unsigned int on_time_threshold = SECOND;
 unsigned int off_time_threshold = 10*SECOND;
 
@@ -47,7 +47,7 @@ unsigned int get_distance(){
         return INF_DISTANCE;
 }
 
-void change(bool new_state){
+void report_change(bool new_state){
     if(new_state != state_on){
         state_on = new_state;
         digitalWrite(LED_PIN, state_on ? HIGH : LOW);
@@ -62,17 +62,17 @@ void loop() {
         // Wait for `on_time_threshold` seconds before reporting proximity.
         if (current_millis > proximity_started + on_time_threshold){
             proximity_reported = current_millis;
-            change(true);
+            report_change(true);
         }
     } else {
         // `proximity_started` records the last time an object was far away.
-        // When this no longer holds, it means beginning of an object is close.
+        // When this no longer holds, it means an object starts to be close.
         proximity_started = current_millis;
 
         // If there was no proximity for `off_time_threshold` seconds since `proximity_reported`,
         // we report the end of proximity.
         if(current_millis > proximity_reported + off_time_threshold){
-            change(false);
+            report_change(false);
         }
     }
 }
