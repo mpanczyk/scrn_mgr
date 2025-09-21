@@ -34,7 +34,7 @@ void setup() {
     near_applied = 0;
 }
 
-unsigned int distance(){
+unsigned int get_distance(){
     VL53L0X_RangingMeasurementData_t measure;
     lox.rangingTest(&measure, false); // pass in 'true' to get debug data printout!
     if (measure.RangeStatus != 4) // phase failures have incorrect data
@@ -52,19 +52,15 @@ void change(bool new_state){
 }
 
 void loop() {
-
-    if(distance() < distance_threshold){
-        ++near_counter;
-    } else {
-        near_counter = 0;
-        last_up = millis();
-    }
-
+    unsigned int distance = get_distance();
     unsigned long current_millis = millis();
-    if (near_counter > 0 && (current_millis > last_up + SECOND)){ // stay for one second to turn on
-        near_applied = current_millis;
-        change(true);
+    if(distance < distance_threshold){
+        if (current_millis > last_up + SECOND){ // stay for one second to turn on
+            near_applied = current_millis;
+            change(true);
+        }
     } else {
+        last_up = current_millis;
         if(current_millis > near_applied + 10*SECOND){
             change(false);
         }
