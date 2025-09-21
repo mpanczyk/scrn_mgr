@@ -1,3 +1,14 @@
+/*
+    Touch screen power manager based on proximity sensor.
+
+    When the proximity sensor detects someone near to the screen,
+    it sends message through MQTT service.
+
+    In response, it may receive a command to turn power of the screen on/off.
+
+    arduino-cli compile --fqbn  esp8266:esp8266:nodemcuv2 scrn_mgr
+    arduino-cli upload -p /dev/ttyUSB0 --fqbn  esp8266:esp8266:nodemcuv2 scrn_mgr
+*/
 #include <ESP8266WiFi.h>
 #include <AsyncMqttClient.h>
 #include "Adafruit_VL53L0X.h"
