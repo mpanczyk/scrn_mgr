@@ -8,11 +8,15 @@
 #define MQTT_PUB_TOUCH "sensor/screen/touch"
 
 #define LED_PIN D5
+#define SECOND 1000
 
 Adafruit_VL53L0X lox = Adafruit_VL53L0X();
 unsigned int distance_threshold;
 unsigned int near_counter; // count how many times an object was near enough
 unsigned long near_applied;
+unsigned long last_up;
+unsigned int INF_DISTANCE = INT_MAX;
+bool state_on = false;
 
 void setup() {
     delay(2000);
@@ -21,7 +25,7 @@ void setup() {
     pinMode(LED_PIN, OUTPUT);
 
     if (!lox.begin()) {
-        Serial.println(F("Failed to boot VL53L0X"));
+        Serial.println("Failed to boot VL53L0X");
         while(1);
     }
     digitalWrite(LED_PIN, LOW);
@@ -30,21 +34,39 @@ void setup() {
     near_applied = 0;
 }
 
-void loop() {
+unsigned int distance(){
     VL53L0X_RangingMeasurementData_t measure;
     lox.rangingTest(&measure, false); // pass in 'true' to get debug data printout!
-    if (measure.RangeStatus != 4) {  // phase failures have incorrect data
-        if(measure.RangeMilliMeter < distance_threshold)
-            ++near_counter;
+    if (measure.RangeStatus != 4) // phase failures have incorrect data
+        return measure.RangeMilliMeter;
+    else
+        return INF_DISTANCE;
+}
+
+void change(bool new_state){
+    if(new_state != state_on){
+        state_on = new_state;
+        digitalWrite(LED_PIN, state_on?HIGH:LOW);
+        Serial.println(state_on? "CLOSE" : "FAR");
     }
-    if (near_counter > 40){
-        near_counter = 0;
-        near_applied = millis();
-        digitalWrite(LED_PIN, HIGH);
+}
+
+void loop() {
+
+    if(distance() < distance_threshold){
+        ++near_counter;
     } else {
-        if(millis() > near_applied + (1000*10)){
-            digitalWrite(LED_PIN, LOW);
+        near_counter = 0;
+        last_up = millis();
+    }
+
+    unsigned long current_millis = millis();
+    if (near_counter > 4 && (current_millis > last_up + SECOND)){ // stay for one second to turn on
+        near_applied = current_millis;
+        change(true);
+    } else {
+        if(current_millis > near_applied + 10*SECOND){
+            change(false);
         }
     }
-    Serial.print(".");
 }
