@@ -21,6 +21,8 @@
 using namespace std;
 
 #define SCREEN_ON_PIN D5
+#define LED_GREEN_PIN D3
+#define LED_RED_PIN D6
 #define SECOND 1000 // 1000 milliseconds
 
 #define DEVICE_NAME "esp_screen"
@@ -61,7 +63,7 @@ Adafruit_VL53L0X lox = Adafruit_VL53L0X();
 unsigned long proximity_reported = 0;
 unsigned long proximity_started = 0;
 unsigned int INF_DISTANCE = INT_MAX;
-bool screen_on = false;
+bool screen_on = true;
 bool proximity = false;
 
 unsigned int distance_threshold = 800; // mm
@@ -174,6 +176,11 @@ void setup() {
 
     pinMode(SCREEN_ON_PIN, OUTPUT);
     digitalWrite(SCREEN_ON_PIN, LOW);
+
+    pinMode(LED_GREEN_PIN, OUTPUT);
+    pinMode(LED_RED_PIN, OUTPUT);
+    digitalWrite(LED_GREEN_PIN, LOW);
+    digitalWrite(LED_RED_PIN, LOW);
 
     if (!lox.begin()) {
         Serial.println("Failed to boot VL53L0X");
