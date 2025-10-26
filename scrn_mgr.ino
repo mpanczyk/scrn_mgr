@@ -40,19 +40,19 @@ using namespace std;
 #define PROXIMITY "proximity"
 #define PROXIMITY_DISCOVERY "homeassistant/binary_sensor/proximity/config"
 #define PROXIMITY_STATE_TOPIC "home/" DEVICE_ID "/proximity/state"
-#define PROXIMITY_DISCOVERY_PAYLOAD "{\"name\": \"Proximity sensor\",\"state_topic\": \"" PROXIMITY_STATE_TOPIC "\",\"payload_on\": \"on\",\"payload_off\": \"off\",\"unique_id\": \"" DEVICE_ID "\",\"device\": {\"identifiers\": [\"esp8266_sensor1\"],\"name\": \"" DEVICE_NAME"_controller\",\"model\": \"Custom Screen Controller\",\"manufacturer\": \"Michal Panczyk\"}}"
+#define PROXIMITY_DISCOVERY_PAYLOAD "{\"name\": \"Proximity sensor\",\"state_topic\": \"" PROXIMITY_STATE_TOPIC "\",\"payload_on\": \"on\",\"payload_off\": \"off\",\"unique_id\": \"" DEVICE_ID  "_proximity\",\"device\": {\"identifiers\": [\"esp8266_sensor1\"],\"name\": \"" DEVICE_NAME"_controller\",\"model\": \"Custom Screen Controller\",\"manufacturer\": \"Michal Panczyk\"}}"
 
 #define SCREEN_TOGGLE "screen_toggle"
 #define SCREEN_TOGGLE_DISCOVERY "homeassistant/switch/" SCREEN_TOGGLE "/config"
 #define SCREEN_TOGGLE_COMMAND_TOPIC "home/" DEVICE_ID "/screen_switch/set"
 #define SCREEN_TOGGLE_STATE_TOPIC "home/" DEVICE_ID "/screen_switch/state"
-#define SCREEN_TOGGLE_DISCOVERY_PAYLOAD "{\"name\": \"Screen State\",\"command_topic\": \"" SCREEN_TOGGLE_COMMAND_TOPIC "\",\"state_topic\": \"" SCREEN_TOGGLE_STATE_TOPIC "\",\"payload_on\": \"on\",\"payload_off\": \"off\",\"unique_id\": \"" DEVICE_ID "\",\"device\": {\"identifiers\": [\"esp8266_sensor1\"],\"name\": \"" DEVICE_NAME"_controller\",\"model\": \"Custom Screen Controller\",\"manufacturer\": \"Michal Panczyk\"}}"
+#define SCREEN_TOGGLE_DISCOVERY_PAYLOAD "{\"name\": \"Screen State\",\"command_topic\": \"" SCREEN_TOGGLE_COMMAND_TOPIC "\",\"state_topic\": \"" SCREEN_TOGGLE_STATE_TOPIC "\",\"payload_on\": \"on\",\"payload_off\": \"off\",\"unique_id\": \"" DEVICE_ID "_screen\",\"device\": {\"identifiers\": [\"esp8266_sensor1\"],\"name\": \"" DEVICE_NAME"_controller\",\"model\": \"Custom Screen Controller\",\"manufacturer\": \"Michal Panczyk\"}}"
 
 #define GLED_TOGGLE "gled_toggle"
 #define GLED_TOGGLE_DISCOVERY "homeassistant/switch/" GLED_TOGGLE "/config"
 #define GLED_TOGGLE_COMMAND_TOPIC "home/" DEVICE_ID "/gled_switch/set"
 #define GLED_TOGGLE_STATE_TOPIC "home/" DEVICE_ID "/gled_switch/state"
-#define GLED_TOGGLE_DISCOVERY_PAYLOAD "{\"name\": \"Green LED State\",\"command_topic\": \"" GLED_TOGGLE_COMMAND_TOPIC "\",\"state_topic\": \"" GLED_TOGGLE_STATE_TOPIC "\",\"payload_on\": \"on\",\"payload_off\": \"off\",\"unique_id\": \"" DEVICE_ID "\",\"device\": {\"identifiers\": [\"esp8266_sensor1\"],\"name\": \"" DEVICE_NAME"_controller\",\"model\": \"Custom Screen Controller\",\"manufacturer\": \"Michal Panczyk\"}}"
+#define GLED_TOGGLE_DISCOVERY_PAYLOAD "{\"name\": \"Green LED State\",\"command_topic\": \"" GLED_TOGGLE_COMMAND_TOPIC "\",\"state_topic\": \"" GLED_TOGGLE_STATE_TOPIC "\",\"payload_on\": \"on\",\"payload_off\": \"off\",\"unique_id\": \"" DEVICE_ID "_gled\",\"device\": {\"identifiers\": [\"esp8266_sensor1\"],\"name\": \"" DEVICE_NAME"_controller\",\"model\": \"Custom Screen Controller\",\"manufacturer\": \"Michal Panczyk\"}}"
 
 
 #define MQTT_TOPIC_PROXIMITY_STATE "screen/get/proximity"
