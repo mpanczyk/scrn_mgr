@@ -54,6 +54,11 @@ using namespace std;
 #define GLED_TOGGLE_STATE_TOPIC "home/" DEVICE_ID "/gled_switch/state"
 #define GLED_TOGGLE_DISCOVERY_PAYLOAD "{\"name\": \"Green LED State\",\"command_topic\": \"" GLED_TOGGLE_COMMAND_TOPIC "\",\"state_topic\": \"" GLED_TOGGLE_STATE_TOPIC "\",\"payload_on\": \"on\",\"payload_off\": \"off\",\"unique_id\": \"" DEVICE_ID "_gled\",\"device\": {\"identifiers\": [\"esp8266_sensor1\"],\"name\": \"" DEVICE_NAME"_controller\",\"model\": \"Custom Screen Controller\",\"manufacturer\": \"Michal Panczyk\"}}"
 
+#define RLED_TOGGLE "rled_toggle"
+#define RLED_TOGGLE_DISCOVERY "homeassistant/switch/" RLED_TOGGLE "/config"
+#define RLED_TOGGLE_COMMAND_TOPIC "home/" DEVICE_ID "/rled_switch/set"
+#define RLED_TOGGLE_STATE_TOPIC "home/" DEVICE_ID "/rled_switch/state"
+#define RLED_TOGGLE_DISCOVERY_PAYLOAD "{\"name\": \"Red LED State\",\"command_topic\": \"" RLED_TOGGLE_COMMAND_TOPIC "\",\"state_topic\": \"" RLED_TOGGLE_STATE_TOPIC "\",\"payload_on\": \"on\",\"payload_off\": \"off\",\"unique_id\": \"" DEVICE_ID "_rled\",\"device\": {\"identifiers\": [\"esp8266_sensor1\"],\"name\": \"" DEVICE_NAME"_controller\",\"model\": \"Custom Screen Controller\",\"manufacturer\": \"Michal Panczyk\"}}"
 
 #define MQTT_TOPIC_PROXIMITY_STATE "screen/get/proximity"
 
@@ -111,6 +116,7 @@ void onMqttConnect(bool sessionPresent) {
   Serial.println("Connected to MQTT.");
   delay(10); // wait for stable connection
   mqttClient.publish(GLED_TOGGLE_DISCOVERY, 1, true, GLED_TOGGLE_DISCOVERY_PAYLOAD);
+  mqttClient.publish(RLED_TOGGLE_DISCOVERY, 1, true, RLED_TOGGLE_DISCOVERY_PAYLOAD);
   Serial.println("Published GLED discovery");
   delay(10); // wait for stable connection
   mqttClient.publish(SCREEN_TOGGLE_DISCOVERY, 1, true, SCREEN_TOGGLE_DISCOVERY_PAYLOAD);
@@ -123,7 +129,8 @@ void onMqttConnect(bool sessionPresent) {
   mqttClient.subscribe(SCREEN_TOGGLE_COMMAND_TOPIC, 1);
   Serial.println("Subscribed to screen toggle command topic");
   mqttClient.subscribe(GLED_TOGGLE_COMMAND_TOPIC, 1);
-  Serial.println("Subscribed to GLED toggle command topic");
+  mqttClient.subscribe(RLED_TOGGLE_COMMAND_TOPIC, 1);
+  Serial.println("Subscribed to GLED and RLED toggle command topics");
 
 
 
@@ -164,6 +171,13 @@ void onMqttMessage(
         mqttClient.publish(GLED_TOGGLE_STATE_TOPIC, 1, true, new_state?"on":"off");
         return;
     }
+    if (t==RLED_TOGGLE_COMMAND_TOPIC){
+        bool new_state = p[1] == 'n';
+        Serial.printf("new RLED state: %s\n", new_state?"on":"off");
+        digitalWrite(LED_RED_PIN, new_state ? HIGH : LOW);
+        mqttClient.publish(RLED_TOGGLE_STATE_TOPIC, 1, true, new_state?"on":"off");
+        return;
+    }
 }
 
 void setup() {
@@ -189,6 +203,7 @@ void setup() {
     digitalWrite(LED_GREEN_PIN, LOW);
     digitalWrite(LED_RED_PIN, LOW);
     mqttClient.publish(GLED_TOGGLE_STATE_TOPIC, 1, true, "off");
+    mqttClient.publish(RLED_TOGGLE_STATE_TOPIC, 1, true, "off");
     mqttClient.publish(SCREEN_TOGGLE_STATE_TOPIC, 1, true, screen_on?"on":"off");
 
     if (!lox.begin()) {
