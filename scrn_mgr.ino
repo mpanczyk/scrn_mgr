@@ -38,24 +38,22 @@ using namespace std;
 #define OFF_TIME_DISCOVERY "homeassistant/number/" DEVICE_NAME "/" OFF_TIME "/config"
 
 #define PROXIMITY "proximity"
-#define PROXIMITY_DISCOVERY "homeassistant/binary_sensor/" DEVICE_NAME "/motion/config"
-#define PROXIMITY_STATE_TOPIC DEVICE_ID "/" PROXIMITY "/state"
-#define PROXIMITY_DISCOVERY_PAYLOAD "{\"name\": \"Proximity sensor\",\"state_topic\": \"" PROXIMITY_STATE_TOPIC "\",\"payload_on\": \"on\",\"payload_off\": \"off\",\"unique_id\": \"" DEVICE_ID "\",\"device\": {\"identifiers\": [\"esp8266_sensor1\"],\"name\": \"" DEVICE_NAME"_screen_controller\",\"model\": \"Custom Screen Controller\",\"manufacturer\": \"Michal Panczyk\"}}"
-
-#define LED_TOGGLE "led_toggle"
-#define LED_TOGGLE_DISCOVERY "homeassistant/switch/" DEVICE_NAME "/" LED_TOGGLE "/config"
+#define PROXIMITY_DISCOVERY "homeassistant/binary_sensor/proximity/config"
+#define PROXIMITY_STATE_TOPIC "home/" DEVICE_ID "/proximity/state"
+#define PROXIMITY_DISCOVERY_PAYLOAD "{\"name\": \"Proximity sensor\",\"state_topic\": \"" PROXIMITY_STATE_TOPIC "\",\"payload_on\": \"on\",\"payload_off\": \"off\",\"unique_id\": \"" DEVICE_ID "\",\"device\": {\"identifiers\": [\"esp8266_sensor1\"],\"name\": \"" DEVICE_NAME"_controller\",\"model\": \"Custom Screen Controller\",\"manufacturer\": \"Michal Panczyk\"}}"
 
 #define SCREEN_TOGGLE "screen_toggle"
-#define SCREEN_TOGGLE_DISCOVERY "homeassistant/switch/" DEVICE_NAME "/" SCREEN_TOGGLE "/config"
-#define SCREEN_TOGGLE_COMMAND_TOPIC DEVICE_ID "/screen_switch/set"
-#define SCREEN_TOGGLE_STATE_TOPIC DEVICE_ID "/screen_switch/state"
-#define SCREEN_TOGGLE_DISCOVERY_PAYLOAD "{\"name\": \"Screen State\",\"command_topic\": \"" SCREEN_TOGGLE_COMMAND_TOPIC "\",\"state_topic\": \"" SCREEN_TOGGLE_STATE_TOPIC "\",\"payload_on\": \"on\",\"payload_off\": \"off\",\"unique_id\": \"" DEVICE_ID "\",\"device\": {\"identifiers\": [\"esp8266_sensor1\"],\"name\": \"" DEVICE_NAME"_screen_controller\",\"model\": \"Custom Screen Controller\",\"manufacturer\": \"Michal Panczyk\"}}"
+#define SCREEN_TOGGLE_DISCOVERY "homeassistant/switch/" SCREEN_TOGGLE "/config"
+#define SCREEN_TOGGLE_COMMAND_TOPIC "home/" DEVICE_ID "/screen_switch/set"
+#define SCREEN_TOGGLE_STATE_TOPIC "home/" DEVICE_ID "/screen_switch/state"
+#define SCREEN_TOGGLE_DISCOVERY_PAYLOAD "{\"name\": \"Screen State\",\"command_topic\": \"" SCREEN_TOGGLE_COMMAND_TOPIC "\",\"state_topic\": \"" SCREEN_TOGGLE_STATE_TOPIC "\",\"payload_on\": \"on\",\"payload_off\": \"off\",\"unique_id\": \"" DEVICE_ID "\",\"device\": {\"identifiers\": [\"esp8266_sensor1\"],\"name\": \"" DEVICE_NAME"_controller\",\"model\": \"Custom Screen Controller\",\"manufacturer\": \"Michal Panczyk\"}}"
 
-#define MQTT_TOPIC_SCREEN_TOGGLE "screen/set/led"
-#define MQTT_TOPIC_LED_TOGGLE "screen/set/display"
-#define MQTT_TOPIC_DISTANCE "screen/set/distance"
-#define MQTT_TOPIC_ON_TIME "screen/set/on_time"
-#define MQTT_TOPIC_OFF_TIME "screen/set/off_time"
+#define GLED_TOGGLE "gled_toggle"
+#define GLED_TOGGLE_DISCOVERY "homeassistant/switch/" GLED_TOGGLE "/config"
+#define GLED_TOGGLE_COMMAND_TOPIC "home/" DEVICE_ID "/gled_switch/set"
+#define GLED_TOGGLE_STATE_TOPIC "home/" DEVICE_ID "/gled_switch/state"
+#define GLED_TOGGLE_DISCOVERY_PAYLOAD "{\"name\": \"Green LED State\",\"command_topic\": \"" GLED_TOGGLE_COMMAND_TOPIC "\",\"state_topic\": \"" GLED_TOGGLE_STATE_TOPIC "\",\"payload_on\": \"on\",\"payload_off\": \"off\",\"unique_id\": \"" DEVICE_ID "\",\"device\": {\"identifiers\": [\"esp8266_sensor1\"],\"name\": \"" DEVICE_NAME"_controller\",\"model\": \"Custom Screen Controller\",\"manufacturer\": \"Michal Panczyk\"}}"
+
 
 #define MQTT_TOPIC_PROXIMITY_STATE "screen/get/proximity"
 
@@ -111,13 +109,24 @@ void onMqttDisconnect(AsyncMqttClientDisconnectReason reason) {
 
 void onMqttConnect(bool sessionPresent) {
   Serial.println("Connected to MQTT.");
+  delay(10); // wait for stable connection
+  mqttClient.publish(GLED_TOGGLE_DISCOVERY, 1, true, GLED_TOGGLE_DISCOVERY_PAYLOAD);
+  Serial.println("Published GLED discovery");
+  delay(10); // wait for stable connection
   mqttClient.publish(SCREEN_TOGGLE_DISCOVERY, 1, true, SCREEN_TOGGLE_DISCOVERY_PAYLOAD);
+  Serial.println("Published screen toggle discovery");
+  delay(10); // wait for stable connection
   mqttClient.publish(PROXIMITY_DISCOVERY, 1, true, PROXIMITY_DISCOVERY_PAYLOAD);
+  Serial.println("Published proximity discovery");
+  delay(10); // wait for stable connection
+
   mqttClient.subscribe(SCREEN_TOGGLE_COMMAND_TOPIC, 1);
-  //mqttClient.subscribe(MQTT_TOPIC_LED_TOGGLE, 1);
-  //mqttClient.subscribe(MQTT_TOPIC_DISTANCE, 1);
-  //mqttClient.subscribe(MQTT_TOPIC_ON_TIME, 1);
-  //mqttClient.subscribe(MQTT_TOPIC_OFF_TIME, 1);
+  Serial.println("Subscribed to screen toggle command topic");
+  mqttClient.subscribe(GLED_TOGGLE_COMMAND_TOPIC, 1);
+  Serial.println("Subscribed to GLED toggle command topic");
+
+
+
   Serial.print("Session present: ");
   Serial.println(sessionPresent);
 }
@@ -146,16 +155,14 @@ void onMqttMessage(
         bool new_state = p[1] == 'n';
         Serial.printf("new state: %s\n", new_state?"on":"off");
         toggle_screen(new_state);
+        return;
     }
-    return;
-    if(!strcmp(topic, MQTT_TOPIC_SCREEN_TOGGLE)){
-        toggle_screen(strcmp(payload, "on") == 0);
-    } else if(!strcmp(topic, MQTT_TOPIC_DISTANCE)){
-        sscanf(payload, "%d", &distance_threshold);
-    } else if(!strcmp(topic, MQTT_TOPIC_ON_TIME)){
-        sscanf(payload, "%d", &on_time_threshold);
-    } else if(!strcmp(topic, MQTT_TOPIC_OFF_TIME)){
-        sscanf(payload, "%d", &off_time_threshold);
+    if (t==GLED_TOGGLE_COMMAND_TOPIC){
+        bool new_state = p[1] == 'n';
+        Serial.printf("new GLED state: %s\n", new_state?"on":"off");
+        digitalWrite(LED_GREEN_PIN, new_state ? HIGH : LOW);
+        mqttClient.publish(GLED_TOGGLE_STATE_TOPIC, 1, true, new_state?"on":"off");
+        return;
     }
 }
 
@@ -181,6 +188,8 @@ void setup() {
     pinMode(LED_RED_PIN, OUTPUT);
     digitalWrite(LED_GREEN_PIN, LOW);
     digitalWrite(LED_RED_PIN, LOW);
+    mqttClient.publish(GLED_TOGGLE_STATE_TOPIC, 1, true, "off");
+    mqttClient.publish(SCREEN_TOGGLE_STATE_TOPIC, 1, true, screen_on?"on":"off");
 
     if (!lox.begin()) {
         Serial.println("Failed to boot VL53L0X");
