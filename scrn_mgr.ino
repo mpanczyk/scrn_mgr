@@ -20,7 +20,7 @@
 
 using namespace std;
 
-#define LED_PIN D5
+#define SCREEN_ON_PIN D5
 #define SECOND 1000 // 1000 milliseconds
 
 #define DEVICE_NAME "esp_screen"
@@ -123,7 +123,7 @@ void onMqttConnect(bool sessionPresent) {
 void toggle_screen(bool new_state){
     if(new_state != screen_on){
         screen_on = new_state;
-        digitalWrite(LED_PIN, screen_on ? HIGH : LOW);
+        digitalWrite(SCREEN_ON_PIN, screen_on ? HIGH : LOW);
         mqttClient.publish(SCREEN_TOGGLE_STATE_TOPIC, 1, true, screen_on?"on":"off");
         Serial.println(screen_on ? "CLOSE" : "FAR");
     }
@@ -172,8 +172,8 @@ void setup() {
     mqttClient.setCredentials(MQTT_USER, MQTT_PASSWORD);
     connectToWifi();
 
-    pinMode(LED_PIN, OUTPUT);
-    digitalWrite(LED_PIN, LOW);
+    pinMode(SCREEN_ON_PIN, OUTPUT);
+    digitalWrite(SCREEN_ON_PIN, LOW);
 
     if (!lox.begin()) {
         Serial.println("Failed to boot VL53L0X");
